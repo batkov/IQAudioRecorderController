@@ -492,5 +492,17 @@
     return nil;
 }
 
+- (void)audioRecorder:(IQAudioRecorder *)controller didFailWithError:(NSError *)error {
+    if ([self.delegate respondsToSelector:@selector(audioRecorderController:didFailWithError:)]) {
+        [self.delegate audioRecorderController:self didFailWithError:error];
+    }
+}
+
+- (void)microphoneAccessDeniedForAudioRecorder:(IQAudioRecorder *)controller {
+    if ([self.delegate respondsToSelector:@selector(microphoneAccessDeniedForAudioRecorderController:)]) {
+        [self.delegate microphoneAccessDeniedForAudioRecorderController:self];
+    }
+}
+
 @end
 

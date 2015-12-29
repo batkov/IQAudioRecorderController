@@ -49,6 +49,15 @@
              AVNumberOfChannelsKey: @(1)};
 }
 
+- (void)audioRecorderController:(IQAudioRecorderController *)controller
+               didFailWithError:(NSError *)error {
+    NSLog(@"audioRecorderController: didFailWithError:%@", error);
+}
+
+- (void)microphoneAccessDeniedForAudioRecorderController:(IQAudioRecorderController *)controller {
+    NSLog(@"microphoneAccessDeniedForAudioRecorderController:");
+}
+
 - (IBAction)playAction:(UIButton *)sender
 {
     MPMoviePlayerViewController *controller = [[MPMoviePlayerViewController alloc] initWithContentURL:[NSURL fileURLWithPath:audioFilePath]];

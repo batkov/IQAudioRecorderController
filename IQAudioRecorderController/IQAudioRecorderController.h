@@ -35,6 +35,10 @@
 
 - (NSDictionary *) recordSettingsForAudioRecorderController:(IQAudioRecorderController *)controller;
 
+// Error Handling
+- (void)audioRecorderController:(IQAudioRecorderController *)controller didFailWithError:(NSError *)error;
+- (void)microphoneAccessDeniedForAudioRecorderController:(IQAudioRecorderController *)controller;
+
 @end
 
 

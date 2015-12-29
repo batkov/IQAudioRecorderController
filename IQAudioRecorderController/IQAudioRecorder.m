@@ -8,7 +8,7 @@
 
 #import "IQAudioRecorder.h"
 
-@interface IQAudioRecorder () <AVAudioPlayerDelegate>
+@interface IQAudioRecorder () <AVAudioPlayerDelegate, AVAudioRecorderDelegate>
 
 @end
 
@@ -38,14 +38,19 @@
             NSDictionary *recordSetting = delegateRecordSettings ? : @{AVFormatIDKey: @(kAudioFormatMPEG4AAC),
                                                                        AVSampleRateKey: @(44100.0),
                                                                        AVNumberOfChannelsKey: @(2)};
-            
+            NSError * error;
             // Initiate and prepare the recorder
             audioRecorder = [[AVAudioRecorder alloc] initWithURL:[NSURL fileURLWithPath:_filePath]
                                                         settings:recordSetting
-                                                           error:nil];
+                                                           error:&error];
+            audioRecorder.delegate = self;
+            if (error) {
+                [self.delegate audioRecorder:self didFailWithError:error];
+            }
             audioRecorder.meteringEnabled = YES;
         }
         
+        [self requestForMicPermission];
     }
     return self;
 }
@@ -53,9 +58,21 @@
 - (void)dealloc
 {
     [audioRecorder stop];
+    audioRecorder.delegate = nil;
     [audioPlayer stop];
+    audioPlayer.delegate = nil;
     
     [[AVAudioSession sharedInstance] setCategory:oldSessionCategory error:nil];
+}
+
+- (void) requestForMicPermission {
+    __weak typeof(self) selff = self;
+    [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+        if (!granted) {
+            [selff.delegate microphoneAccessDeniedForAudioRecorder:selff];
+        }
+    }];
+    
 }
 
 - (CGFloat)updateMeters
@@ -97,7 +114,12 @@
 // HINT: this method is likely (and should) to be called on a background thread -> ensure thread safety
 - (void)prepareForRecording
 {
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryRecord error:nil];
+    NSError * error;
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryRecord error:&error];
+    if (error) {
+        [self.delegate audioRecorder:self didFailWithError:error];
+    }
+    
     [audioRecorder prepareToRecord];
     recordingIsPrepared = YES;
 }
@@ -136,11 +158,19 @@
 
 - (void)startPlayback
 {
+    NSError * error;
     // TODO: prevent playback while recording is running and vice versa
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error];
+    if (error) {
+        [self.delegate audioRecorder:self didFailWithError:error];
+    }
     recordingIsPrepared = NO;
     
-    audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:self.filePath] error:nil];
+    audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:self.filePath]
+                                                         error:&error];
+    if (error) {
+        [self.delegate audioRecorder:self didFailWithError:error];
+    }
     audioPlayer.delegate = self;
     audioPlayer.meteringEnabled = YES;
     [audioPlayer prepareToPlay];
@@ -169,9 +199,19 @@
 
 #pragma mark - AVAudioPlayerDelegate
 
--(void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
 {
     [self.delegate audioRecorder:self didFinishPlaybackSuccessfully:flag];
+}
+
+- (void)audioPlayerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError *)error {
+    [self.delegate audioRecorder:self didFailWithError:error];
+}
+
+#pragma mark - AVAudioRecorderDelegate
+
+- (void)audioRecorderEncodeErrorDidOccur:(AVAudioRecorder *)recorder error:(NSError *)error {
+    [self.delegate audioRecorder:self didFailWithError:error];
 }
 
 
