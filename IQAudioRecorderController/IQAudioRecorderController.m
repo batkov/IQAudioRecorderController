@@ -439,11 +439,16 @@
     [recorder stopPlayback];    // TODO: no reason to stop - pause shoud do the trick (+rewind)
 }
 
--(void)deleteAction:(UIBarButtonItem*)item
-{
+-(void)deleteAction:(UIBarButtonItem*)item {
+    [self showDeletePrompt];
+}
+
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_3
+- (void) showDeletePrompt {
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Delete Recording" otherButtonTitles:nil, nil];
     actionSheet.tag = 1;
     [actionSheet showInView:self.view];
+    
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -452,14 +457,36 @@
     {
         if (buttonIndex == actionSheet.destructiveButtonIndex)
         {
-            [recorder discardRecording];
-            
-            self.playButton.enabled = NO;
-            self.trashButton.enabled = NO;
-            [self.navigationItem setRightBarButtonItem:nil animated:YES];
-            self.navigationItem.title = self.title;
+            [self performDelete];
         }
     }
+}
+#else
+- (void) showDeletePrompt {
+    UIAlertController * alert = [UIAlertController alertControllerWithTitle:nil
+                                                                    message:nil
+                                                             preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Delete Recording"
+                                              style:UIAlertActionStyleDestructive
+                                            handler:^(UIAlertAction * _Nonnull action) {
+                                                [self performDelete];
+                                            }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                              style:UIAlertActionStyleCancel
+                                            handler:nil]];
+    [self presentViewController:alert
+                       animated:YES
+                     completion:nil];
+}
+#endif
+
+- (void) performDelete {
+    [recorder discardRecording];
+    
+    self.playButton.enabled = NO;
+    self.trashButton.enabled = NO;
+    [self.navigationItem setRightBarButtonItem:nil animated:YES];
+    self.navigationItem.title = self.title;
 }
 
 -(void)showNavigationButtons:(BOOL)show
