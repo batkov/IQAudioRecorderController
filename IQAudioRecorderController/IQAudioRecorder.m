@@ -42,10 +42,8 @@
                                                         settings:recordSetting
                                                            error:nil];
             audioRecorder.meteringEnabled = YES;
-            
-            [self prepareForRecording];
         }
-
+        
     }
     return self;
 }
