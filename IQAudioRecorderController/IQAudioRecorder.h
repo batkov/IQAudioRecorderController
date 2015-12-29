@@ -31,10 +31,15 @@
 
 @protocol IQAudioRecorderDelegate <NSObject>
 
-- (NSDictionary *) recordSettingsForAudioRecorder:(IQAudioRecorder *)recorder;
 - (void)audioRecorder:(IQAudioRecorder *)recorder didFinishPlaybackSuccessfully:(BOOL)successfully;
+- (void)audioRecorder:(IQAudioRecorder *)recorder didFinishRecordingSuccessfully:(BOOL)successfully;
+
 - (void)audioRecorder:(IQAudioRecorder *)controller didFailWithError:(NSError *)error;
+
 - (void)microphoneAccessDeniedForAudioRecorder:(IQAudioRecorder *)controller;
+// Advanced settings
+- (NSDictionary *) recordSettingsForAudioRecorder:(IQAudioRecorder *)recorder;
+- (NSTimeInterval) recordDurationForAudioRecorder:(IQAudioRecorder *)controller;
 
 @end
 

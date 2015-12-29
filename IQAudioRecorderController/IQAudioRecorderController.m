@@ -378,14 +378,15 @@
         [recorder stopRecording];
     }
     
-    //UI Update
-    {
-        [self spreadTintColor:recorder.isRecording ? self.recordingTintColor : self.normalTintColor];
-        
-        [self showNavigationButtons:!recorder.isRecording];
-        self.playButton.enabled = !recorder.isRecording;
-        self.trashButton.enabled = !recorder.isRecording;
-    }
+    [self updateUIDueToRecordedAction];
+}
+
+- (void) updateUIDueToRecordedAction {
+    [self spreadTintColor:recorder.isRecording ? self.recordingTintColor : self.normalTintColor];
+    
+    [self showNavigationButtons:!recorder.isRecording];
+    self.playButton.enabled = !recorder.isRecording;
+    self.trashButton.enabled = !recorder.isRecording;
 }
 
 - (void)playAction:(UIBarButtonItem *)item
@@ -485,6 +486,10 @@
     [self pauseAction:nil];
 }
 
+- (void)audioRecorder:(IQAudioRecorder *)recorder didFinishRecordingSuccessfully:(BOOL)successfully {
+    [self updateUIDueToRecordedAction];
+}
+
 - (NSDictionary *) recordSettingsForAudioRecorder:(IQAudioRecorder *)recorder {
     if ([self.delegate respondsToSelector:@selector(recordSettingsForAudioRecorderController:)]) {
         return [self.delegate recordSettingsForAudioRecorderController:self];
@@ -502,6 +507,13 @@
     if ([self.delegate respondsToSelector:@selector(microphoneAccessDeniedForAudioRecorderController:)]) {
         [self.delegate microphoneAccessDeniedForAudioRecorderController:self];
     }
+}
+
+- (NSTimeInterval) recordDurationForAudioRecorder:(IQAudioRecorder *)controller {
+    if ([self.delegate respondsToSelector:@selector(recordDurationForAudioRecorderController:)]) {
+        return [self.delegate recordDurationForAudioRecorderController:self];
+    }
+    return 0;
 }
 
 @end

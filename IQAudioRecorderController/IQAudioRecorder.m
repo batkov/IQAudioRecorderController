@@ -129,7 +129,12 @@
     if (!recordingIsPrepared) {
         [self prepareForRecording];
     }
-    [audioRecorder record];
+    NSTimeInterval duration = [self.delegate recordDurationForAudioRecorder:self];
+    if (duration <= 0) {
+        [audioRecorder record];
+    } else {
+        [audioRecorder recordForDuration:duration];
+    }
     recordingIsPrepared = NO;
 }
 
@@ -209,6 +214,9 @@
 }
 
 #pragma mark - AVAudioRecorderDelegate
+- (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag {
+    [self.delegate audioRecorder:self didFinishRecordingSuccessfully:flag];
+}
 
 - (void)audioRecorderEncodeErrorDidOccur:(AVAudioRecorder *)recorder error:(NSError *)error {
     [self.delegate audioRecorder:self didFailWithError:error];

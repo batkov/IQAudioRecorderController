@@ -33,12 +33,13 @@
 - (void)audioRecorderController:(IQAudioRecorderController *)controller didFinishWithAudioAtPath:(NSString *)filePath;
 - (void)audioRecorderControllerDidCancel:(IQAudioRecorderController *)controller;
 
-- (NSDictionary *) recordSettingsForAudioRecorderController:(IQAudioRecorderController *)controller;
-
 // Error Handling
 - (void)audioRecorderController:(IQAudioRecorderController *)controller didFailWithError:(NSError *)error;
 - (void)microphoneAccessDeniedForAudioRecorderController:(IQAudioRecorderController *)controller;
 
+// Advanced Record control
+- (NSDictionary *) recordSettingsForAudioRecorderController:(IQAudioRecorderController *)controller;
+- (NSTimeInterval) recordDurationForAudioRecorderController:(IQAudioRecorderController *)controller; // <= 0 will start endless record
 @end
 
 
