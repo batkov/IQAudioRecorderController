@@ -126,12 +126,12 @@
 {
     UIView *view = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     view.backgroundColor = [UIColor darkGrayColor];
-
+    
     musicFlowView = [[SCSiriWaveformView alloc] initWithFrame:view.bounds];
     musicFlowView.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:musicFlowView];
     self.view = view;
-
+    
     NSLayoutConstraint *constraintRatio = [NSLayoutConstraint constraintWithItem:musicFlowView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:musicFlowView attribute:NSLayoutAttributeHeight multiplier:1.0 constant:0];
     
     NSLayoutConstraint *constraintCenterX = [NSLayoutConstraint constraintWithItem:musicFlowView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0];
@@ -152,10 +152,10 @@
     self.playingTintColor = self.playingTintColor ?: [UIColor colorWithRed:255.0/255.0 green:64.0/255.0 blue:64.0/255.0 alpha:1.0];
     
     musicFlowView.backgroundColor = [self.view backgroundColor];
-//    musicFlowView.idleAmplitude = 0;
+    //    musicFlowView.idleAmplitude = 0;
     musicFlowView.primaryWaveLineWidth = 3.0f;
     musicFlowView.secondaryWaveLineWidth = 1.0;
-
+    
     // Navigation Bar Settings
     {
         self.navigationItem.hidesBackButton = YES;
@@ -183,13 +183,13 @@
         _viewPlayerDuration = [[UIView alloc] init];
         _viewPlayerDuration.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         _viewPlayerDuration.backgroundColor = [UIColor clearColor];
-
+        
         _labelCurrentTime = [[UILabel alloc] init];
         _labelCurrentTime.text = [self.class timeStringForTimeInterval:0];
         _labelCurrentTime.font = [UIFont boldSystemFontOfSize:14.0];
         _labelCurrentTime.textColor = self.normalTintColor;
         _labelCurrentTime.translatesAutoresizingMaskIntoConstraints = NO;
-
+        
         _playerSlider = [[UISlider alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 64)];
         _playerSlider.minimumTrackTintColor = self.playingTintColor;
         _playerSlider.value = 0;
@@ -198,7 +198,7 @@
         [_playerSlider addTarget:self action:@selector(sliderEnd:) forControlEvents:UIControlEventTouchUpInside];
         [_playerSlider addTarget:self action:@selector(sliderEnd:) forControlEvents:UIControlEventTouchUpOutside];
         _playerSlider.translatesAutoresizingMaskIntoConstraints = NO;
-
+        
         _labelRemainingTime = [[UILabel alloc] init];
         _labelCurrentTime.text = [self.class timeStringForTimeInterval:0];
         _labelRemainingTime.userInteractionEnabled = YES;
@@ -240,8 +240,7 @@
     _navigationControllerToolbarWasHidden = self.navigationController.toolbarHidden;
     [self.navigationController setToolbarHidden:NO animated:YES];
     
-    recorder = [[IQAudioRecorder alloc] init];
-    recorder.delegate = self;
+    recorder = [[IQAudioRecorder alloc] initWithDelegate:self];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
         [recorder prepareForRecording];
     });
@@ -277,7 +276,7 @@
     if (recorder.isRecording || recorder.isPlaying)
     {
         [musicFlowView updateWithLevel:[recorder updateMeters]];
-    
+        
         if (recorder.isRecording) {
             self.navigationItem.title = [self.class timeStringForTimeInterval:recorder.currentTime];
             musicFlowView.waveColor = self.recordingTintColor;
@@ -409,11 +408,11 @@
         
         _labelCurrentTime.text = [self.class timeStringForTimeInterval:recorder.currentTime];
         _labelRemainingTime.text = [self.class timeStringForTimeInterval:(_shouldShowRemainingTime)?(recorder.playbackDuration-recorder.currentTime):recorder.playbackDuration];
-
+        
         [_viewPlayerDuration setNeedsLayout];
         [_viewPlayerDuration layoutIfNeeded];
         self.navigationItem.titleView = _viewPlayerDuration;
-
+        
         [playProgressDisplayLink invalidate];
         playProgressDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(updatePlayProgress)];
         [playProgressDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
@@ -435,7 +434,7 @@
     {
         [playProgressDisplayLink invalidate];
     }
-
+    
     [recorder stopPlayback];    // TODO: no reason to stop - pause shoud do the trick (+rewind)
 }
 
@@ -484,6 +483,13 @@
 {
     //To update UI on stop playing
     [self pauseAction:nil];
+}
+
+- (NSDictionary *) recordSettingsForAudioRecorder:(IQAudioRecorder *)recorder {
+    if ([self.delegate respondsToSelector:@selector(recordSettingsForAudioRecorderController:)]) {
+        return [self.delegate recordSettingsForAudioRecorderController:self];
+    }
+    return nil;
 }
 
 @end

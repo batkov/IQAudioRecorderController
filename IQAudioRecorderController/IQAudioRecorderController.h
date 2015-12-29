@@ -33,6 +33,8 @@
 - (void)audioRecorderController:(IQAudioRecorderController *)controller didFinishWithAudioAtPath:(NSString *)filePath;
 - (void)audioRecorderControllerDidCancel:(IQAudioRecorderController *)controller;
 
+- (NSDictionary *) recordSettingsForAudioRecorderController:(IQAudioRecorderController *)controller;
+
 @end
 
 

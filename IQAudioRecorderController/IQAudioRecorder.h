@@ -31,12 +31,16 @@
 
 @protocol IQAudioRecorderDelegate <NSObject>
 
+- (NSDictionary *) recordSettingsForAudioRecorder:(IQAudioRecorder *)recorder;
 - (void)audioRecorder:(IQAudioRecorder *)recorder didFinishPlaybackSuccessfully:(BOOL)successfully;
 
 @end
 
 
 @interface IQAudioRecorder : NSObject
+
+-(instancetype)init NS_UNAVAILABLE;
+-(instancetype)initWithDelegate:(id<IQAudioRecorderDelegate>) delegate NS_DESIGNATED_INITIALIZER;
 
 @property (nonatomic, weak) id<IQAudioRecorderDelegate> delegate;
 

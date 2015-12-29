@@ -6,6 +6,7 @@
 #import "ViewController.h"
 
 #import <MediaPlayer/MediaPlayer.h>
+#import <AVFoundation/AVFoundation.h>
 
 @implementation ViewController
 {
@@ -40,6 +41,12 @@
 -(void)audioRecorderControllerDidCancel:(IQAudioRecorderController *)controller
 {
     buttonPlayAudio.enabled = NO;
+}
+
+-(NSDictionary *)recordSettingsForAudioRecorderController:(IQAudioRecorderController *)controller {
+    return @{AVFormatIDKey: @(kAudioFormatMPEG4AAC),
+             AVSampleRateKey: @(22050.0),
+             AVNumberOfChannelsKey: @(1)};
 }
 
 - (IBAction)playAction:(UIButton *)sender

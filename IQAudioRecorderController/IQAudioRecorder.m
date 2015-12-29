@@ -22,9 +22,10 @@
     NSString *oldSessionCategory;
 }
 
-- (instancetype)init
+- (instancetype) initWithDelegate:(id<IQAudioRecorderDelegate>) delegate
 {
     if (self = [super init]) {
+        _delegate = delegate;
         // Unique recording URL
         NSString *fileName = [[NSProcessInfo processInfo] globallyUniqueString];
         _filePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.m4a", fileName]];
@@ -33,9 +34,10 @@
         
         // Define the recorder setting
         {
-            NSDictionary *recordSetting = @{AVFormatIDKey: @(kAudioFormatMPEG4AAC),
-                                            AVSampleRateKey: @(44100.0),
-                                            AVNumberOfChannelsKey: @(2)};
+            NSDictionary *delegateRecordSettings = [_delegate recordSettingsForAudioRecorder:self];
+            NSDictionary *recordSetting = delegateRecordSettings ? : @{AVFormatIDKey: @(kAudioFormatMPEG4AAC),
+                                                                       AVSampleRateKey: @(44100.0),
+                                                                       AVNumberOfChannelsKey: @(2)};
             
             // Initiate and prepare the recorder
             audioRecorder = [[AVAudioRecorder alloc] initWithURL:[NSURL fileURLWithPath:_filePath]
