@@ -50,6 +50,7 @@
 @property (nonatomic) IBInspectable UIColor *normalTintColor;
 @property (nonatomic) IBInspectable UIColor *recordingTintColor;
 @property (nonatomic) IBInspectable UIColor *playingTintColor;
+@property (nonatomic) IBInspectable UIColor *backgroundColor;
 
 // Toolbar
 @property (nonatomic) UIBarButtonItem *playButton;

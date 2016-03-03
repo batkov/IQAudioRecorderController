@@ -125,7 +125,7 @@
 -(void)loadView
 {
     UIView *view = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    view.backgroundColor = [UIColor darkGrayColor];
+    view.backgroundColor = self.backgroundColor ? : [UIColor darkGrayColor];
     
     musicFlowView = [[SCSiriWaveformView alloc] initWithFrame:view.bounds];
     musicFlowView.translatesAutoresizingMaskIntoConstraints = NO;
