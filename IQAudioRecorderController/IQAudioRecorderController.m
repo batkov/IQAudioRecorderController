@@ -115,8 +115,14 @@
 - (void)setup
 {
     self.title = self.title ?: @"Audio Recorder";
-    
-    self.recordButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"IQAudioRecorderController.bundle/audio_record"]
+    NSBundle * bundle = [NSBundle bundleForClass:[self class]];
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
+    NSString * path = [bundle pathForResource:@"audio_record"  ofType:@"png"];
+    UIImage * image = [UIImage imageWithContentsOfFile:path];
+#else
+    UIImage * image = [UIImage imageNamed:@"audio_record" inBundle:bundle compatibleWithTraitCollection:nil];
+#endif
+    self.recordButton = [[UIBarButtonItem alloc] initWithImage:image
                                                          style:UIBarButtonItemStylePlain
                                                         target:self
                                                         action:@selector(recordingButtonAction:)];
